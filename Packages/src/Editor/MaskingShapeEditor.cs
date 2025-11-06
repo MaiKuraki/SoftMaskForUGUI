@@ -33,7 +33,7 @@ namespace Coffee.UISoftMask
             Utils.GetStencilBits(current.transform, false, useStencil, out var mask, out var _);
             var maskingMode = mask is SoftMask softMask ? softMask.GetActualMaskingMode() : SoftMask.MaskingMode.Normal;
             EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.EnumPopup(new GUIContent("Masking Mode"), maskingMode);
+            EditorGUILayout.EnumPopup("Masking Mode", maskingMode);
             EditorGUI.EndDisabledGroup();
 
             EditorGUILayout.PropertyField(_maskingMethod);
