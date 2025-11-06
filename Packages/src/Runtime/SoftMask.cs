@@ -116,6 +116,8 @@ namespace Coffee.UISoftMask
 
         public MaskingShape.MaskingMethod maskingMethod => MaskingShape.MaskingMethod.Additive;
 
+        public MaskingShape.RaycastMethod raycastMethod => MaskingShape.RaycastMethod.Additive;
+
         /// <summary>
         /// Masking mode.<br />
         /// <b>SoftMasking</b>: Use RenderTexture as a soft mask buffer. The alpha of the masking graphic can be used.<br />

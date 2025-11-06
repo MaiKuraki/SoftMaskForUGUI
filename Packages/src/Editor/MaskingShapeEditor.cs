@@ -12,6 +12,7 @@ namespace Coffee.UISoftMask
         private SerializedProperty _maskingMethod;
         private SerializedProperty _showMaskGraphic;
         private SerializedProperty _softnessRange;
+        private SerializedProperty _raycastMethod;
 
         protected void OnEnable()
         {
@@ -20,6 +21,7 @@ namespace Coffee.UISoftMask
             _alphaHitTest = serializedObject.FindProperty("m_AlphaHitTest");
             _antiAliasingThreshold = serializedObject.FindProperty("m_AntiAliasingThreshold");
             _softnessRange = serializedObject.FindProperty("m_SoftnessRange");
+            _raycastMethod = serializedObject.FindProperty("m_RaycastMethod");
         }
 
         public override void OnInspectorGUI()
@@ -52,6 +54,7 @@ namespace Coffee.UISoftMask
                     break;
             }
 
+            EditorGUILayout.PropertyField(_raycastMethod);
             serializedObject.ApplyModifiedProperties();
 
             // Draw alpha hit test warning

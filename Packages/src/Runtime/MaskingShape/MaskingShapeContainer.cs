@@ -106,17 +106,16 @@ namespace Coffee.UISoftMask
             valid = defaultValid;
             for (var i = 0; i < m_MaskingShapes.Count; i++)
             {
-                if (!m_MaskingShapes[i] || !m_MaskingShapes[i].IsInside(sp, eventCamera, threshold)) continue;
-                switch (m_MaskingShapes[i].maskingMethod)
+                var maskingShape = m_MaskingShapes[i];
+                if (!maskingShape || !maskingShape.IsInside(sp, eventCamera, threshold)) continue;
+                switch (maskingShape.actualRaycastMethod)
                 {
-                    case MaskingShape.MaskingMethod.Additive:
+                    case MaskingShape.RaycastMethod.Additive:
                         valid = true;
                         break;
-                    case MaskingShape.MaskingMethod.Subtract:
+                    case MaskingShape.RaycastMethod.Subtract:
                         valid = false;
                         break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
                 }
             }
 

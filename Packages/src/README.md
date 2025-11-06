@@ -346,6 +346,11 @@ scene or prefab.
     - ⚠️ Enable this only if necessary, as it will require more graphics memory and processing time.
 - **Softness Range** (SoftMasking only): Override the softness range of the parent `SoftMask` component.
 - **Anti Aliasing Threshold** (AntiAliasing only): Override the anti-alias threshold of the parent `SoftMask` component.
+- **Raycast Method**:
+    - `Auto (Default)`: Same behavior as before. A mode similar to `Masking Method` is selected.
+    - `Additive`: When the pointer is within this shape, the raycast is enabled.
+    - `Subtract`: When the pointer is within this shape, the raycast is disabled.
+    - `Ignore`: This shape is ignored in raycast determination.
 
 `MaskingShape` component allows you to add or remove the masking region.  
 Placing `MaskingShape` component (with any `Graphic`) under `SoftMask` component.  

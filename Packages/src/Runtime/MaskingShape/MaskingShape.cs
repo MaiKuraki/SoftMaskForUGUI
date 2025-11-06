@@ -22,6 +22,14 @@ namespace Coffee.UISoftMask
             Subtract
         }
 
+        public enum RaycastMethod
+        {
+            Auto,
+            Additive,
+            Subtract,
+            Ignore
+        }
+
         [Tooltip("Masking method.")]
         [SerializeField]
         private MaskingMethod m_MaskingMethod = MaskingMethod.Additive;
@@ -46,6 +54,10 @@ namespace Coffee.UISoftMask
                  "The larger the gap between these values, the stronger the softness effect.")]
         [SerializeField]
         private MinMax01 m_SoftnessRange = new MinMax01(0, 1f);
+
+        [Tooltip("Method to determine whether this masking shape should be a raycast target.")]
+        [SerializeField]
+        private RaycastMethod m_RaycastMethod = RaycastMethod.Auto;
 
         private bool _antiAliasingRegistered;
         private MaskingShapeContainer _container;
@@ -133,6 +145,30 @@ namespace Coffee.UISoftMask
 
                 m_SoftnessRange = value;
                 SetContainerDirty();
+            }
+        }
+
+        /// <summary>
+        /// Method to determine whether this masking shape should be a raycast target.
+        /// </summary>
+        public RaycastMethod raycastMethod
+        {
+            get => parent != null ? parent.raycastMethod : m_RaycastMethod;
+            set => m_RaycastMethod = value;
+        }
+
+        /// <summary>
+        /// Method to determine whether this masking shape should be a raycast target.
+        /// </summary>
+        public RaycastMethod actualRaycastMethod
+        {
+            get
+            {
+                return raycastMethod != RaycastMethod.Auto
+                    ? raycastMethod
+                    : maskingMethod == MaskingMethod.Additive
+                        ? RaycastMethod.Additive
+                        : RaycastMethod.Subtract;
             }
         }
 
