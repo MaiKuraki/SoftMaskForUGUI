@@ -19,7 +19,7 @@ namespace Coffee.UISoftMask
     [DisallowMultipleComponent]
     [ExecuteAlways]
     [Icon("Packages/com.coffee.softmask-for-ugui/Icons/SoftMaskIcon.png")]
-    public class SoftMask : Mask, IMeshModifier, IMaskable, IMaskingShapeContainerOwner, ISerializationCallbackReceiver
+    public class SoftMask : Mask, ISoftMasking, IMaskable, IMaskingShapeContainerOwner, ISerializationCallbackReceiver
     {
         /// <summary>
         /// Down sampling rate.
@@ -113,6 +113,8 @@ namespace Coffee.UISoftMask
 
         private List<SoftMask> children =>
             _children != null ? _children : _children = InternalListPool<SoftMask>.Rent();
+
+        public MaskingShape.MaskingMethod maskingMethod => MaskingShape.MaskingMethod.Additive;
 
         /// <summary>
         /// Masking mode.<br />
@@ -259,27 +261,6 @@ namespace Coffee.UISoftMask
 
                 m_SoftnessRange = value;
                 SetSoftMaskDirty();
-            }
-        }
-
-        /// <summary>
-        /// The transparency of the masking graphic.
-        /// </summary>
-        public float alpha
-        {
-            get => graphic ? graphic.color.a : 1;
-            set
-            {
-                value = Mathf.Clamp01(value);
-                if (!this || Mathf.Approximately(alpha, value)) return;
-
-                isDirty = true;
-                if (graphic)
-                {
-                    var color = graphic.color;
-                    color.a = value;
-                    graphic.color = color;
-                }
             }
         }
 
@@ -499,7 +480,7 @@ namespace Coffee.UISoftMask
                 return;
             }
 
-            GraphicDuplicator.CopyMesh(mesh, _mesh ? _mesh : _mesh = MeshExtensions.Rent());
+            mesh.CopyTo(_mesh ? _mesh : _mesh = MeshExtensions.Rent());
         }
 
         void IMeshModifier.ModifyMesh(VertexHelper verts)
@@ -510,7 +491,7 @@ namespace Coffee.UISoftMask
                 return;
             }
 
-            GraphicDuplicator.CopyMesh(verts, _mesh ? _mesh : _mesh = MeshExtensions.Rent());
+            verts.CopyTo(_mesh ? _mesh : _mesh = MeshExtensions.Rent());
         }
 
         private void SetDirtyAndNotifyIfBufferSizeChanged()
@@ -851,7 +832,9 @@ namespace Coffee.UISoftMask
                 Profiler.EndSample();
 
                 Profiler.BeginSample("(SM4UI)[SoftMask] RenderSoftMaskBuffer > ApplyMaterialPropertyBlock");
-                var texture = GraphicDuplicator.GetMainTexture(graphic);
+                var proxy = GraphicProxy.Find(graphic);
+                var texture = proxy.GetMainTexture(graphic);
+                var alpha = proxy.GetAlpha(graphic);
                 SoftMaskUtils.ApplyMaterialPropertyBlock(_mpb, softMaskDepth, texture, softnessRange, alpha);
                 Profiler.EndSample();
             }

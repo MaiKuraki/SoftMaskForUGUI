@@ -13,7 +13,8 @@ namespace Coffee.UISoftMask
     [RequireComponent(typeof(Graphic))]
     [DisallowMultipleComponent]
     [Icon("Packages/com.coffee.softmask-for-ugui/Icons/SoftMaskIcon.png")]
-    public class MaskingShape : UIBehaviour, IMeshModifier, IMaterialModifier, IComparable<MaskingShape>, IMaskable
+    public class MaskingShape : UIBehaviour, IMeshModifier, IMaterialModifier, IComparable<MaskingShape>, IMaskable,
+        ISoftMasking
     {
         public enum MaskingMethod
         {
@@ -65,9 +66,14 @@ namespace Coffee.UISoftMask
         public bool hasTransformChanged =>
             transform.HasChanged(ref _prevTransformMatrix, UISoftMaskProjectSettings.transformSensitivity);
 
+        /// <summary>
+        /// Sync parameters with SoftMask component.
+        /// </summary>
+        internal ISoftMasking parent { get; set; }
+
         public MaskingMethod maskingMethod
         {
-            get => m_MaskingMethod;
+            get => parent != null ? parent.maskingMethod : m_MaskingMethod;
             set
             {
                 if (m_MaskingMethod == value) return;
@@ -83,7 +89,7 @@ namespace Coffee.UISoftMask
         /// </summary>
         public bool showMaskGraphic
         {
-            get => m_ShowMaskGraphic;
+            get => parent != null ? parent.showMaskGraphic : m_ShowMaskGraphic;
             set
             {
                 if (m_ShowMaskGraphic == value) return;
@@ -100,7 +106,7 @@ namespace Coffee.UISoftMask
         /// </summary>
         public bool alphaHitTest
         {
-            get => m_AlphaHitTest;
+            get => parent != null ? parent.alphaHitTest : m_AlphaHitTest;
             set => m_AlphaHitTest = value;
         }
 
@@ -110,7 +116,7 @@ namespace Coffee.UISoftMask
         /// </summary>
         public float antiAliasingThreshold
         {
-            get => m_AntiAliasingThreshold;
+            get => parent != null ? parent.antiAliasingThreshold : m_AntiAliasingThreshold;
             set => m_AntiAliasingThreshold = value;
         }
 
@@ -120,33 +126,13 @@ namespace Coffee.UISoftMask
         /// </summary>
         public MinMax01 softnessRange
         {
-            get => m_SoftnessRange;
+            get => parent != null ? parent.softnessRange : m_SoftnessRange;
             set
             {
                 if (m_SoftnessRange.Approximately(value)) return;
 
                 m_SoftnessRange = value;
                 SetContainerDirty();
-            }
-        }
-
-        /// <summary>
-        /// The transparency of the masking graphic.
-        /// </summary>
-        public float alpha
-        {
-            get => graphic ? graphic.color.a : 1;
-            set
-            {
-                value = Mathf.Clamp01(value);
-                if (!this || Mathf.Approximately(alpha, value)) return;
-
-                if (graphic)
-                {
-                    var color = graphic.color;
-                    color.a = value;
-                    graphic.color = color;
-                }
             }
         }
 
@@ -308,7 +294,7 @@ namespace Coffee.UISoftMask
                 return;
             }
 
-            GraphicDuplicator.CopyMesh(mesh, _mesh ? _mesh : _mesh = MeshExtensions.Rent());
+            mesh.CopyTo(_mesh ? _mesh : _mesh = MeshExtensions.Rent());
         }
 
         void IMeshModifier.ModifyMesh(VertexHelper verts)
@@ -319,7 +305,7 @@ namespace Coffee.UISoftMask
                 return;
             }
 
-            GraphicDuplicator.CopyMesh(verts, _mesh ? _mesh : _mesh = MeshExtensions.Rent());
+            verts.CopyTo(_mesh ? _mesh : _mesh = MeshExtensions.Rent());
         }
 
         internal bool AntiAliasingEnabled()
@@ -359,8 +345,8 @@ namespace Coffee.UISoftMask
         {
             if (graphic)
             {
-                graphic.SetMaterialDirty();
-                SoftMaskUtils.UpdateMeshUI(graphic);
+                var proxy = GraphicProxy.Find(graphic);
+                proxy.SetMaterialDirty(graphic);
             }
         }
 
@@ -417,7 +403,8 @@ namespace Coffee.UISoftMask
 
         internal void DrawSoftMaskBuffer(CommandBuffer cb, int depth)
         {
-            var texture = GraphicDuplicator.GetMainTexture(graphic);
+            var proxy = GraphicProxy.Find(graphic);
+            var texture = proxy.GetMainTexture(graphic);
             var mesh = _mesh;
             if (!mesh) return;
             if (!graphic.IsInScreen()) return;
@@ -428,6 +415,7 @@ namespace Coffee.UISoftMask
                 _mpb = SoftMaskUtils.materialPropertyBlockPool.Rent();
             }
 
+            var alpha = proxy.GetAlpha(graphic);
             SoftMaskUtils.ApplyMaterialPropertyBlock(_mpb, depth, texture, softnessRange, alpha);
             var softMaterial = SoftMaskUtils.GetSoftMaskingMaterial(maskingMethod);
 

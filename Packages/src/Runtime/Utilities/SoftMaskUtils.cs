@@ -3,12 +3,8 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
-using UnityEngine.UI;
 #if URP_ENABLE
 using UnityEngine.Rendering.Universal;
-#endif
-#if TMP_ENABLE
-using TMPro;
 #endif
 
 namespace Coffee.UISoftMask
@@ -121,60 +117,7 @@ namespace Coffee.UISoftMask
                 }
             }
 #endif
-
-#if TMP_ENABLE
-            TMPro_EventManager.TEXT_CHANGED_EVENT.Add(UpdateMeshUI);
-#endif
         }
-
-        public static void UpdateMeshUI(Object obj)
-        {
-#if TMP_ENABLE
-            if (!(obj is TextMeshProUGUI text)) return;
-
-            if (text.TryGetComponent<SoftMask>(out var sm))
-            {
-#pragma warning disable CS0618
-                (sm as IMeshModifier).ModifyMesh(text.mesh);
-#pragma warning restore CS0618
-                UpdateSubMeshUI(text, sm.enabled, sm.showMaskGraphic, sm.antiAliasingThreshold, sm.softnessRange,
-                    MaskingShape.MaskingMethod.Additive);
-            }
-            else if (text.TryGetComponent<MaskingShape>(out var ms))
-            {
-#pragma warning disable CS0618
-                (ms as IMeshModifier).ModifyMesh(text.mesh);
-#pragma warning restore CS0618
-                UpdateSubMeshUI(text, ms.enabled, ms.showMaskGraphic, ms.antiAliasingThreshold, ms.softnessRange,
-                    ms.maskingMethod);
-            }
-        }
-
-        private static void UpdateSubMeshUI(TextMeshProUGUI text, bool enabled, bool show, float aa, MinMax01 softness,
-            MaskingShape.MaskingMethod method)
-        {
-            var subMeshes = InternalListPool<TMP_SubMeshUI>.Rent();
-            text.GetComponentsInChildren(subMeshes, 1);
-
-            for (var i = 0; i < subMeshes.Count; i++)
-            {
-                var maskingShape = subMeshes[i].GetOrAddComponent<MaskingShape>();
-                maskingShape.hideFlags = HideFlags.NotEditable;
-                maskingShape.enabled = enabled;
-                maskingShape.maskingMethod = method;
-                maskingShape.antiAliasingThreshold = aa;
-                maskingShape.softnessRange = softness;
-                maskingShape.showMaskGraphic = show;
-#pragma warning disable CS0618
-                (maskingShape as IMeshModifier).ModifyMesh(subMeshes[i].mesh);
-#pragma warning restore CS0618
-            }
-
-            InternalListPool<TMP_SubMeshUI>.Return(ref subMeshes);
-        }
-#else
-        }
-#endif
 
         /// <summary>
         /// Applies properties to a MaterialPropertyBlock for soft masking.

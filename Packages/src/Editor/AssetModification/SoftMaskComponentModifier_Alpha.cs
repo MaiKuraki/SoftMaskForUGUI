@@ -13,7 +13,13 @@ namespace Coffee.UISoftMask
 
             if (!dryRun)
             {
-                softMask.alpha = softMask.m_Alpha;
+                if (softMask.graphic)
+                {
+                    var color = softMask.graphic.color;
+                    color.a = softMask.m_Alpha;
+                    softMask.graphic.color = color;
+                }
+
                 softMask.m_Alpha = -1;
 
                 EditorUtility.SetDirty(softMask.gameObject);
