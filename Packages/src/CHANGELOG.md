@@ -1,3 +1,16 @@
+# [3.5.0](https://github.com/mob-sakai/SoftMaskForUGUI/compare/3.4.1...3.5.0) (2025-11-08)
+
+
+### Bug Fixes
+
+* avoid gc in editor ([31d58a2](https://github.com/mob-sakai/SoftMaskForUGUI/commit/31d58a2fa6f222c260e72568ee00e002aaeb72af))
+
+
+### Features
+
+* add `Raycast Method` option for `MaskingShape` component ([f43254d](https://github.com/mob-sakai/SoftMaskForUGUI/commit/f43254d37cd01efff55c72412c5327d4237ec58c)), closes [#262](https://github.com/mob-sakai/SoftMaskForUGUI/issues/262)
+* support vertex alpha for TextMeshPro SubMeshUI ([d3070e3](https://github.com/mob-sakai/SoftMaskForUGUI/commit/d3070e38c139705d750edc0eeb1d94ea40a30dbb)), closes [#261](https://github.com/mob-sakai/SoftMaskForUGUI/issues/261)
+
 ## [3.4.1](https://github.com/mob-sakai/SoftMaskForUGUI/compare/3.4.0...3.4.1) (2025-10-25)
 
 
